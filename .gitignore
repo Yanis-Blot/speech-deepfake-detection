@@ -1,0 +1,17 @@
+# data / caches
+data/
+*.flac
+*.wav
+*.parquet
+*.arrow
+
+# model weights
+*.pt
+*.pth
+checkpoints/
+
+# Python / Jupyter / OS
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+.DS_Store
