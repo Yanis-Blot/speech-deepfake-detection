@@ -16,8 +16,7 @@ Load `Bisher/ASVspoof_2019_LA` (train/validation/test, already split with disjoi
 
 ## 2. Sanity checks (before any training)
 - Verify no `speaker_id` appears in more than one split (data leakage check)
-- Compute bonafide/spoof proportions per split → confirm the imbalance (~1 real for ~9 fakes)
-- Note the `system_id` distribution (A01–A06 in train/dev, A07–A19 in eval) — keep this in mind, don't use it as a model input
+- Compute bonafide/spoof proportions per split → confirm the imbalance 
 
 ## 3. Audio preprocessing (common to all models except wav2vec2)
 - Resample to 16 kHz
