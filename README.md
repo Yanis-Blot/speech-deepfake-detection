@@ -4,6 +4,27 @@ In this work, we are testing and comparing few ML approaches for deepfake recogn
 
 Our goal is to make a comprehensive comparison, and to show, and more importantly, explain why an architecture performs better than another for this specific task.
 
+## Repository Structure
+```
+speech-deepfake-detection/
+├── src/                  # all shared code (imported, never copied)
+│   ├── data.py           # dataset, preprocessing, dataloaders — SHARED
+│   ├── features.py       # mel-spectrogram, MFCC, LFCC — SHARED
+│   ├── metrics.py        # EER, accuracy — SHARED
+│   ├── train.py          # single training loop for every model — SHARED
+│   └── models/           # one file per architecture (one owner each)
+│       └── __init__.py   # model registry: name → class
+├── configs/              # one YAML file per experiment
+├── notebooks/            # exploration only, one subfolder per person
+├── results/              # one line per run → the final comparison table
+└── requirements.txt      # pip install -r requirements.txt
+```
+
+**Important: Rules**
+- Files marked SHARED change only through a reviewed pull request.
+- Every model takes the same input: `(waveform [B, 64000], label)`.
+- Every model is evaluated with `src/metrics.py`, on the same splits and seed.
+
 
 # Audio Deepfake Detection — Project Process
 
