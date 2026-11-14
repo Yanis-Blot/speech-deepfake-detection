@@ -25,6 +25,12 @@ speech-deepfake-detection/
 - Every model takes the same input: `(waveform [B, 64000], label)`.
 - Every model is evaluated with `src/metrics.py`, on the same splits and seed.
 
+## Setup the project
+It's quick, few lines to install dependencies, and root packages, so we can import easily files from other folders.
+```
+pip install -r requirements.txt
+pip install -e .        # makes `from src...` work from anywhere
+```
 
 # Audio Deepfake Detection — Project Process
 
