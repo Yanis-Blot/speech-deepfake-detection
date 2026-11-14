@@ -5,6 +5,12 @@ data/
 *.parquet
 *.arrow
 
+# credentials (school server access) — never commit
+auth/
+authentification.zip
+ssh_key
+ssh_key.pub
+
 # model weights
 *.pt
 *.pth
