@@ -1,0 +1,7 @@
+torch
+torchaudio
+datasets
+torchcodec
+numpy
+scikit-learn
+pyyaml

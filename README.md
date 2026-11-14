@@ -20,6 +20,12 @@ speech-deepfake-detection/
 └── requirements.txt      # pip install -r requirements.txt
 ```
 
+**Important: Rules**
+- Files marked SHARED change only through a reviewed pull request.
+- Every model takes the same input: `(waveform [B, 64000], label)`.
+- Every model is evaluated with `src/metrics.py`, on the same splits and seed.
+
+
 # Audio Deepfake Detection — Project Process
 
 Consolidated pipeline combining the 3-model plan (MLP baseline, CNN, wav2vec2) with the
