@@ -1,0 +1,22 @@
+# ── How to build/install the project (always the same 3 lines) ──
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+# ── Who the project is ──
+[project]
+name = "speech-deepfake-detection"
+version = "0.1.0"
+description = "Comparing ML architectures for speech deepfake detection on ASVspoof 2019 LA"
+readme = "README.md"
+requires-python = ">=3.10"             # refuse to install on older Python
+authors = [
+    { name = "Kenza" },                
+    { name = "Dhruv" }, 
+    { name = "Yasser" }, 
+    { name = "Yanis" },                
+]
+
+# ── Where the code is ──
+[tool.setuptools.packages.find]
+include = ["src*"]                     # install src/ and src/models/
