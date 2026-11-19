@@ -1,0 +1,11 @@
+1. **Comparability with the literature.** The official ASVspoof2019 LA split (train/dev/eval) is the one used by every published baseline (LFCC-GMM, CQCC-GMM, RawNet2, AASIST…). Changing it would make our results incomparable to the field's reference numbers, while the brief explicitly asks us to motivate our choices "using state-of-the-art."
+
+2. **Preserving the dataset's scientific purpose.** The split isn't arbitrary: train/dev only contain known attacks (A01–A06), eval exclusively contains unseen attacks (A07–A19). This exact partition is what lets us measure generalization to never-seen synthesis techniques — the core problem the brief poses. Changing it would void that measurement.
+
+3. **Protocol integrity verified empirically, not assumed.** We checked it ourselves (not just trusted the documentation): 0 speakers shared between train/validation/test, 0 duplicate files, no attack leakage between splits. The official split is therefore reliable as-is.
+
+4. **The volume (25k in train) is not a real compute constraint on our infrastructure.** With feature caching (computed once, not recomputed every epoch), a full training run on the official train set takes anywhere from a few minutes (CNN) to 1–2h (full wav2vec2 fine-tuning) on the school's GPU server — well within reach. The perceived slowness initially came from repeatedly recomputing spectrograms every epoch, not from the data volume itself.
+
+5. **Merging train+validation would have gained volume at an unjustified methodological cost**: losing a dev set that's independent in the strict protocol sense, for a gain that addresses no real constraint (neither compute nor performance) once feature caching is in place. The cost/benefit doesn't justify deviating from the official protocol.
+
+6. **Final decision, documented**: official split kept intact (train=25,380, validation=24,844, eval=71,237 — never touched during training); speed gained through descriptor caching, not through shrinking the dataset.
