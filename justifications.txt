@@ -9,3 +9,9 @@
 5. **Merging train+validation would have gained volume at an unjustified methodological cost**: losing a dev set that's independent in the strict protocol sense, for a gain that addresses no real constraint (neither compute nor performance) once feature caching is in place. The cost/benefit doesn't justify deviating from the official protocol.
 
 6. **Final decision, documented**: official split kept intact (train=25,380, validation=24,844, eval=71,237 — never touched during training); speed gained through descriptor caching, not through shrinking the dataset.
+
+7.## **Decision — Local Dataset Storage vs. Hugging Face Streaming** : 1\. **Training stability.** Local storage eliminates dependency on network connectivity and provides more consistent training performance across multiple epochs. 2\. **Dataset already downloaded.** The complete ASVspoof2019 LA dataset (121,461 recordings) is already stored in our Docker container, making streaming unnecessary. 3\. **Efficient training and reproducibility.** Local storage supports random access, full shuffling, and feature caching, facilitating repeated experiments and fair comparisons between models. 4\. **No GPU memory disadvantage.** PyTorch DataLoaders process audio in mini-batches without loading the entire dataset into GPU memory. 5\. **Final decision:** Keep the original dataset locally in Docker, apply preprocessing separately, and use mini-batch loading with optional feature caching.
+
+8. **Project Infrastructure and Version Control.** The project is developed in a remote Docker container on the school's GPU server, with a shared GitHub repository for version control and collaboration. At the end of each working day, changes are committed and pushed to GitHub to maintain an up-to-date version of the project and track its development history.
+
+9. python -m pip freeze > requirements.txt , pour Maj le fichier requirements
