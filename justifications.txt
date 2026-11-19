@@ -15,3 +15,25 @@
 8. **Project Infrastructure and Version Control.** The project is developed in a remote Docker container on the school's GPU server, with a shared GitHub repository for version control and collaboration. At the end of each working day, changes are committed and pushed to GitHub to maintain an up-to-date version of the project and track its development history.
 
 9. python -m pip freeze > requirements.txt , pour Maj le fichier requirements
+
+
+tous les audios sont à 16KHZ , donc pas besoin du réechantilloange
+
+
+presentatio nppt : expliquer :
+_ Un **audio numérique** est une représentation d'un son sous forme d'une suite de valeurs numériques appelées **échantillons**.
+
+Chaque échantillon représente la **valeur de l'amplitude du signal sonore à un instant précis**.
+
+Ces échantillons sont obtenus grâce à un processus appelé **échantillonnage**, qui consiste à mesurer le signal sonore à intervalles de temps réguliers.
+
+Le nombre d'échantillons prélevés par seconde est appelé **fréquence d'échantillonnage**, exprimée en hertz (Hz).
+
+Par exemple, une fréquence d'échantillonnage de **16 kHz** signifie que le signal est mesuré **16 000 fois par seconde**.
+
+
+et expliquer aussi :
+
+Parce que le son dans la réalité est un signal continu, alors qu'un ordinateur travaille avec des données numériques.
+
+L'échantillonnage permet donc de transformer ce signal continu en une suite de mesures prises à des instants précis.
