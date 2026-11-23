@@ -17,10 +17,10 @@
 9. python -m pip freeze > requirements.txt , pour Maj le fichier requirements
 
 
-tous les audios sont à 16KHZ , donc pas besoin du réechantilloange
+10 .tous les audios sont à 16KHZ , donc pas besoin du réechantilloange
 
 
-presentatio nppt : expliquer :
+11 . presentatio nppt : expliquer :
 _ Un **audio numérique** est une représentation d'un son sous forme d'une suite de valeurs numériques appelées **échantillons**.
 
 Chaque échantillon représente la **valeur de l'amplitude du signal sonore à un instant précis**.
@@ -31,9 +31,53 @@ Le nombre d'échantillons prélevés par seconde est appelé **fréquence d'éch
 
 Par exemple, une fréquence d'échantillonnage de **16 kHz** signifie que le signal est mesuré **16 000 fois par seconde**.
 
-
 et expliquer aussi :
 
 Parce que le son dans la réalité est un signal continu, alors qu'un ordinateur travaille avec des données numériques.
 
 L'échantillonnage permet donc de transformer ce signal continu en une suite de mesures prises à des instants précis.
+
+
+12 . Nous avons ajouté la fonction `leading_silence_duration()` afin de mesurer la durée du silence précédant la parole dans chaque enregistrement. Cette analyse permet d'étudier les différences éventuelles entre les audios authentiques et synthétiques, et d'identifier un potentiel biais lié aux silences initiaux. En effet, un modèle de détection pourrait exploiter ces différences plutôt que d'apprendre des caractéristiques acoustiques pertinentes de la voix. La fonction utilise un seuil d'amplitude de 0,01 au lieu de rechercher des valeurs strictement nulles, afin de tenir compte du bruit résiduel présent dans les enregistrements. Les résultats de cette analyse nous aideront à déterminer si un traitement des silences est nécessaire avant l'entraînement des modèles.
+
+13. On a choisi cette baseline plutôt que “toujours spoof” parce qu’elle teste une vraie hypothèse de biais de collecte (le silence), alors que “toujours spoof” donnerait un EER=0.5 trivial sous cette métrique, donc aucune information nouvelle. On a testé plusieurs seuils (0.005 à 0.05) parce que la mesure du silence dépend directement de ce paramètre arbitraire — un seul seuil choisi au hasard aurait pu nous faire conclure à tort “pas de biais” ou “fort biais” selon la chance.
+
+14. Puisque l’EER reste entre 0.338 et 0.42 (loin de 0, proche de l’aléatoire) à tous les seuils testés, le silence seul n’explique pas la classification sur ce dataset → on n’impose pas de trim_silence obligatoire dans le prétraitement, on le garde juste comme option configurable pour pouvoir tester “avec/sans” en ablation plus tard si un modèle réel montre un comportement suspect.
+
+15. Pourquoi des zéros et pas une répétition de l’audio ?
+
+Deux raisons techniques, qui rejoignent ce qu’on vient de voir avec le biais de silence :
+
+La répétition crée un signal artificiel qui n’existe pas dans la réalité. Si on boucle un extrait de 2s pour atteindre 4s, le point de raccordement (fin → début) crée une discontinuité brutale (un “clic”) qui n’a rien à voir avec de la parole. Un modèle basé sur un spectrogramme pourrait très bien détecter ce clic comme un artefact haute fréquence — et si, par malchance, les fichiers courts sont plus souvent bonafide ou plus souvent spoof dans le dataset, le modèle apprendrait encore un raccourci inventé par le prétraitement, exactement comme le biais de silence qu’on vient de tester.
+Avec le padding par zéros + le mask, on peut dire explicitement au modèle “ceci n’est pas du vrai contenu, ignore-le”. Avec la répétition, on ne peut pas faire ça : le signal répété ressemble à du vrai signal, donc le mask ne pourrait plus distinguer “réel” de “artificiel” — toute la logique de masquage qu’on a mise en place (et qui doit arriver dans le CNN plus tard) s’effondre.
+
+16. 4 secondes correspond approximativement au 75e percentile des durées mesurées sur le train (4.11s), et coïncide avec la valeur standard (64600 échantillons) utilisée dans les baselines ASVspoof de référence (RawNet2, AASIST), ce qui permet une comparaison cohérente avec la littérature.
+
+17. on a vérifié que toute la chaîne fonctionne, AVANT d'investir du temps dans un vrai modèle.
+On a appliqué un principe classique en ML : ne jamais lancer un entraînement complet (des heures, sur 25 000 fichiers) sur un pipeline qu'on n'a pas testé à petite échelle. Si quelque chose est cassé (une forme de tenseur incompatible, un gradient qui ne circule pas), mieux vaut le découvrir en 2 secondes sur 8 exemples que de le découvrir après 3 heures d'entraînement sur tout le dataset.
+
+18. un MLP minimal sur waveform brut obtient un EER de 0.43, pire que la baseline triviale (0.338), ce qui confirme la nécessité d'une extraction de features adaptée au signal audio plutôt qu'un apprentissage direct sur l'amplitude brute.
+
+19. Pourquoi une représentation 2D (spectrogramme + CNN2D)
+
+On a fait du 2D pour transformer le waveform brut en une représentation temps-fréquence (un spectrogramme), afin que le modèle puisse exploiter des motifs localisés à la fois dans le temps et dans la fréquence — exactement comme une image. Cette approche permet de réutiliser directement les architectures convolutives 2D vues en cours (CNN, Unet), offre une représentation interprétable visuellement (on peut afficher et comparer des spectrogrammes bonafide vs spoof), et bénéficie du partage de poids et de l'invariance locale des convolutions, qui corrige le problème observé avec notre MLP sur waveform brut (surapprentissage massif, EER train=0.059 vs validation=0.432, faute d'une structure exploitable par une simple couche dense).
+
+Pourquoi le STFT (et pas Mel, MFCC, ou un traitement 1D)
+
+On a choisi le STFT (en échelle linéaire, pas Mel) car les artefacts caractéristiques des techniques de synthèse vocale (vocoders, GANs) se concentrent typiquement dans les hautes fréquences — une zone que l'échelle Mel compresse volontairement pour imiter la perception auditive humaine, au détriment de l'information la plus discriminante pour la détection de spoofing. Le STFT linéaire préserve une résolution fréquentielle uniforme sur tout le spectre, ce qui est cohérent avec les pratiques documentées en anti-spoofing (préférence pour des échelles linéaires/CQT plutôt que Mel/MFCC, utilisées plutôt en reconnaissance vocale classique).
+
+prq pas MFCC = Mel (perd déjà les hautes fréquences) + DCT (perd en plus les détails fins du spectre) → c'est une double perte d'information, chacune retirant un type de signal potentiellement discriminant pour détecter un deepfake
+
+Justification du choix "spectrogramme STFT, directement donné au CNN" (sans DCT, sans réduction en coefficients)
+Source 1 — comparaison directe entre types de spectrogrammes
+
+Une étude récente sur ASVspoof 2019, "Deepfake Audio Detection Using Spectrogram-based Feature and Ensemble of Deep Learning Models" (Pham et al., 2024), compare explicitement plusieurs transformations — le signal audio brut est transformé en différents spectrogrammes via trois méthodes : Short-time Fourier Transform (STFT), Constant-Q Transform (CQT) — et entraîne des modèles CNN/RNN directement sur ces spectrogrammes. Résultat : les spectrogrammes STFT ont généralement donné les meilleures performances, avec un ensemble final atteignant un EER de 0.03 sur ASVspoof 2019.
+Lien : https://arxiv.org/html/2407.01777v1 
+fraunhofer
+arxiv
+
+Source 2 — justification du choix "spectrogramme brut" plutôt que "coefficients cepstraux" (DCT)
+
+Un papier de synthèse sur la détection de deepfake vocal confirme explicitement ce choix architectural : les features de type "image" comme le Mel-spectrogramme ou le CQT-spectrogramme sont généralement traitées comme des images et passées à des classifieurs CNN, et surtout : le spectrogramme nécessite moins de puissance de calcul que l'extraction de coefficients spectraux via DCT, tout en garantissant une bonne précision de détection.
+Lien : https://arxiv.org/pdf/2404.13914 (A Survey on Speech Deepfake Detection) 
+arxiv
