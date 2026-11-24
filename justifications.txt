@@ -81,3 +81,6 @@ Source 2 — justification du choix "spectrogramme brut" plutôt que "coefficien
 Un papier de synthèse sur la détection de deepfake vocal confirme explicitement ce choix architectural : les features de type "image" comme le Mel-spectrogramme ou le CQT-spectrogramme sont généralement traitées comme des images et passées à des classifieurs CNN, et surtout : le spectrogramme nécessite moins de puissance de calcul que l'extraction de coefficients spectraux via DCT, tout en garantissant une bonne précision de détection.
 Lien : https://arxiv.org/pdf/2404.13914 (A Survey on Speech Deepfake Detection) 
 arxiv
+
+
+

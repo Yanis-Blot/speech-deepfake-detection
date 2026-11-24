@@ -33,3 +33,23 @@ def compute_eer(labels, scores):
     eer = (fpr[idx] + fnr[idx]) / 2
     threshold = thresholds[idx]
     return float(eer), float(threshold)
+
+def per_attack_eer(labels, scores, system_ids):
+    """EER calculé séparément pour chaque type d'attaque, en combinant à chaque fois
+    tous les bonafide avec UN SEUL type de spoof à la fois."""
+    import numpy as np
+    labels = np.asarray(labels)
+    scores = np.asarray(scores)
+    system_ids = np.asarray(system_ids)
+
+    bonafide_mask = labels == 0
+    attack_ids = sorted(set(system_ids[~bonafide_mask]))
+
+    results = {}
+    for attack_id in attack_ids:
+        attack_mask = system_ids == attack_id
+        subset_mask = bonafide_mask | attack_mask
+        eer, _ = compute_eer(labels[subset_mask], scores[subset_mask])
+        results[attack_id] = eer
+    return results
+
